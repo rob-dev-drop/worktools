@@ -1,13 +1,14 @@
 // ==UserScript==
-// @name         Simple Merchant Launcher (Tiny, Light, Better Help)
+// @name         Merchant Switcher
 // @namespace    http://tampermonkey.net/
-// @version      1.8
-// @description  Minimal Seller Central launcher...
-// @updateURL    https://github.com/rob-dev-drop/worktools/raw/refs/heads/main/merchant-launcher.user.js
-// @downloadURL  https://github.com/rob-dev-drop/worktools/raw/refs/heads/main/merchant-launcher.user.js
+// @version      1.0
+// @description  Minimal Seller Central account switcher.
 // @match        *://*/*
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @updateURL    https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/merchant-launcher.user.js
+// @downloadURL  https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/merchant-launcher.user.js
+// @author       Roberto Rivas
 // ==/UserScript==
 
 (function () {
