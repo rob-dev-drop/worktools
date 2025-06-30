@@ -3,8 +3,8 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.8
 // @description  Minimal Seller Central launcher...
-// @updateURL    https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/merchant-launcher.user.js
-// @downloadURL  https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/merchant-launcher.user.js
+// @updateURL    https://github.com/rob-dev-drop/worktools/raw/refs/heads/main/merchant-launcher.user.js
+// @downloadURL  https://github.com/rob-dev-drop/worktools/raw/refs/heads/main/merchant-launcher.user.js
 // @match        *://*/*
 // @grant        GM_getValue
 // @grant        GM_setValue
