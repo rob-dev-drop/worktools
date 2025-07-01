@@ -181,8 +181,8 @@
             welcome.style.color = '#265f30';
             welcome.innerHTML = `
                 <b>Welcome!</b><br>
-                Click <b>+ Add Current Page</b> to add a merchant.<br>
-                (or import a list)
+                Click <b>+ Add</b> to add a merchant.<br>
+                (or import a list)<br>
             `;
             listContainer.appendChild(welcome);
         } else {
@@ -365,7 +365,10 @@
         alert(
 `Account Switcher
 ------------------------
-- Click the icon to open the launcher.
+- To add a merchant correctly:
+- Switch to the desired account as usual
+- Click on '+ Add'
+- Change 'Amazon" to the desired name.
 - Use the Edit switch (panel top) to rearrange or edit merchants.
 - Drag to reorder, use ✏️/❌ to edit or delete.
 - Click a merchant name (Edit OFF) to open in a new tab.
