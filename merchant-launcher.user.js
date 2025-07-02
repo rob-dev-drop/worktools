@@ -2,7 +2,7 @@
 // @name         Merchant Switcher
 // @namespace    http://tampermonkey.net/
 // @version      1.0
-// @description  Minimal Seller Central account switcher for a faster and easier account change when needed.
+// @description  Minimal Seller Central account switcher for a faster and easier account change when needed. Last update July 2nd
 // @match        *://*/*
 // @grant        GM_getValue
 // @grant        GM_setValue
