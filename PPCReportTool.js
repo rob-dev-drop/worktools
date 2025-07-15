@@ -1,15 +1,15 @@
 // ==UserScript==
 // @name         PPC Report Tool
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  PPC report tool with improved user experience
+// @version      1.0.1
+// @description  PPC report tool with improved user experience for the pirawna team
 // @author       Roberto Rivas
 // @supportURL   mailto:roberto@pirawna.com
 // @match        https://www.google.com
 // @grant        none
 // @require      https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js
-// @updateURL    https://github.com/rob-dev-drop/worktools/raw/refs/heads/main/
-// @downloadURL  https://github.com/rob-dev-drop/worktools/raw/refs/heads/main/
+// @updateURL    https://github.com/rob-dev-drop/worktools/raw/refs/heads/main/PPCReportTool.js
+// @downloadURL  https://github.com/rob-dev-drop/worktools/raw/refs/heads/main/PPCReportTool.js
 // ==/UserScript==
 
 
