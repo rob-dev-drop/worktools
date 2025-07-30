@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         MarketOps Tools
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.2.1
 // @description  A merchant switcher AND a case tracker. Last updated July 30th
-// @match        *://*/*
+// @match        https://sellercentral.amazon.com/*
+// @match        https://advertising.amazon.com/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @updateURL    https://github.com/rob-dev-drop/worktools/raw/refs/heads/main/merchant-launcher.user.js
