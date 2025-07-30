@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Merchant Switcher
+// @name         MarketOps Tools
 // @namespace    http://tampermonkey.net/
-// @version      1.0.1
-// @description  Minimal Seller Central account switcher for a faster and easier account change when needed. Last update July 2nd
+// @version      1.2
+// @description  A merchant switcher AND a case tracker. Last updated July 30th
 // @match        *://*/*
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -13,6 +13,8 @@
 
 (function () {
     'use strict';
+
+    // MERCHANT SWITCHER CODE STARTS HERE
 
     const localStorageKey = 'simpleMerchants';
     const KEEP_PARAMS = [
@@ -706,5 +708,257 @@
     topBar.style.display = 'none';
     setEditSwitchState();
     renderList();
+
+    // CASE TRACKER CODE STARTS HERE
+
+    const caseKey_alt = 'simpleCases';
+    const merchantKey_alt = 'simpleMerchants';
+
+    let caseData = [];
+    try {
+        caseData = JSON.parse(GM_getValue(caseKey_alt, '[]'));
+    } catch (e) {
+        caseData = [];
+    }
+
+    let merchantList = [];
+    try {
+        merchantList = JSON.parse(GM_getValue(merchantKey_alt, '[]'));
+    } catch (e) {
+        merchantList = [];
+    }
+
+    const caseContainer = document.createElement('div');
+    caseContainer.id = 'case-launcher-widget';
+    caseContainer.style.position = 'fixed';
+    caseContainer.style.bottom = '7px';
+    caseContainer.style.left = '45px';
+    caseContainer.style.zIndex = '9999';
+    document.body.appendChild(caseContainer);
+
+    const caseTrigger = document.createElement('button');
+    caseTrigger.id = 'case-trigger';
+    caseTrigger.title = 'Show Case Tracker';
+    caseTrigger.type = 'button';
+    caseTrigger.setAttribute('aria-label', 'Show Case Tracker');
+    caseTrigger.textContent = '📋';
+    caseTrigger.style.cssText = `
+        background: #e5d0d0;
+        color: #8c2525;
+        border: none;
+        border-radius: 50%;
+        box-shadow: 0 2px 6px rgba(95, 38, 38, 0.14);
+        width: 30px;
+        height: 30px;
+        font-size: 17px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    caseContainer.appendChild(caseTrigger);
+
+    const casePanel = document.createElement('div');
+    casePanel.id = 'case-panel';
+    casePanel.style.cssText = `
+        position: absolute;
+        bottom: 38px;
+        left: 0;
+        background: #fff;
+        border: 2px solid #8c2525;
+        border-radius: 14px;
+        box-shadow: 0 10px 24px rgba(95, 38, 38, 0.18);
+        min-width: 280px;
+        padding: 10px;
+        display: none;
+        z-index: 999;
+    `;
+    caseContainer.appendChild(casePanel);
+
+    const caseListContainer = document.createElement('div');
+    casePanel.appendChild(caseListContainer);
+
+    const caseAddBtn = document.createElement('button');
+    caseAddBtn.textContent = '+ Add Case';
+    caseAddBtn.style = 'background:#f2bcbc;color:#8c2525;border:none;border-radius:4px;margin-top:6px;padding:4px 8px;cursor:pointer;';
+    casePanel.appendChild(caseAddBtn);
+    const caseExportBtn = document.createElement('button');
+    caseExportBtn.textContent = '⬇ Export CSV';
+    caseExportBtn.style = 'background:#f2bcbc;color:#8c2525;border:none;border-radius:4px;margin-top:6px;margin-left:6px;padding:4px 8px;cursor:pointer;';
+    casePanel.appendChild(caseExportBtn);
+
+    const caseAddForm = document.createElement('div');
+    caseAddForm.style.display = 'none';
+    casePanel.appendChild(caseAddForm);
+
+    function showAddCaseForm(title = '', url = '', merchant = '', editIdx = null) {
+        caseAddForm.innerHTML = `
+            <input type="text" id="case-title" placeholder="Case Title" style="margin-top:6px;width:95%;margin-bottom:4px;" />
+            <input type="text" id="case-url" placeholder="Case URL" style="width:95%;margin-bottom:4px;" />
+            <select id="case-merchant" style="width:95%;margin-bottom:6px;">
+                <option value="">Select Merchant</option>
+                ${merchantList.map(m => `<option value="${m.name}">${m.name}</option>`).join('')}
+            </select>
+            <button id="case-save">Save</button>
+            <button id="case-cancel" style="margin-left:8px;">Cancel</button>
+        `;
+        caseAddForm.style.display = 'block';
+        caseAddBtn.style.display = 'none';
+
+        document.getElementById('case-title').value = title;
+        document.getElementById('case-url').value = url;
+        document.getElementById('case-merchant').value = merchant;
+
+        const saveBtn = caseAddForm.querySelector('#case-save');
+        const cancelBtn = caseAddForm.querySelector('#case-cancel');
+
+        saveBtn.onclick = () => {
+            const newTitle = document.getElementById('case-title').value.trim();
+            const newUrl = document.getElementById('case-url').value.trim();
+            const newMerchant = document.getElementById('case-merchant').value.trim();
+
+            if (!newTitle || !newUrl || !newMerchant) {
+                alert('Title, URL, and Merchant are required.');
+                return;
+            }
+
+            const entry = { title: newTitle, url: newUrl, merchant: newMerchant };
+            if (editIdx !== null) {
+                caseData[editIdx] = entry;
+            } else {
+                caseData.push(entry);
+            }
+            saveCases();
+            caseAddForm.style.display = 'none';
+            caseAddBtn.style.display = 'inline-block';
+        };
+
+        cancelBtn.onclick = () => {
+            caseAddForm.style.display = 'none';
+            caseAddBtn.style.display = 'inline-block';
+        };
+
+    }
+    function exportCasesAsCSV() {
+    if (!caseData.length) {
+        alert('No case data to export.');
+        return;
+    }
+
+    const header = ['Title', 'URL', 'Merchant'];
+    const rows = caseData.map(c => [
+        `"${c.title.replace(/"/g, '""')}"`,
+        `"${c.url.replace(/"/g, '""')}"`,
+        `"${c.merchant.replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = [header.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'cases-export.csv');
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+
+    function renderCaseList() {
+        caseListContainer.innerHTML = '';
+        if (caseData.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.textContent = 'No cases yet. Click + Add Case.';
+            emptyMsg.style.color = '#8c2525';
+            caseListContainer.appendChild(emptyMsg);
+            return;
+        }
+
+        caseData.forEach((item, idx) => {
+            const row = document.createElement('div');
+            row.style = 'display:flex;align-items:flex-start;gap:4px;margin-bottom:6px;flex-direction: column;border-bottom: 1px solid #eee;padding-bottom:4px;';
+
+            const btn = document.createElement('button');
+            const caseId = (() => {
+                try {
+                    const u = new URL(item.url);
+                    return u.searchParams.get('caseID');
+                } catch (e) {
+                    return '';
+                }
+            })();
+            const label = caseId ? `[${item.merchant}] [${caseId}]` : `[${item.merchant}]`;
+            btn.innerHTML = `<b>${item.title}</b><br><small style="color:#a44;">${label}</small>`;
+            btn.title = item.url;
+            btn.onclick = () => {
+                if (item.url && item.url.trim()) {
+                    window.open(item.url, '_blank');
+                }
+            };
+            btn.style = 'text-align:left;background:none;border:none;color:#8c2525;cursor:pointer;';
+            row.appendChild(btn);
+
+            const controls = document.createElement('div');
+            controls.style = 'display:flex;gap:4px;';
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = '✏️';
+            editBtn.style = 'background:none;border:none;cursor:pointer;';
+            editBtn.onclick = () => showAddCaseForm(item.title, item.url, item.merchant, idx);
+            controls.appendChild(editBtn);
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '❌';
+            delBtn.style = 'background:none;border:none;cursor:pointer;';
+            delBtn.onclick = () => {
+                if (confirm(`Delete case "${item.title}"?`)) {
+                    caseData.splice(idx, 1);
+                    saveCases();
+                }
+            };
+            controls.appendChild(delBtn);
+            row.appendChild(controls);
+
+            caseListContainer.appendChild(row);
+        });
+    }
+
+    function saveCases() {
+        GM_setValue(caseKey_alt, JSON.stringify(caseData));
+        renderCaseList();
+    }
+
+    caseAddBtn.onclick = () => {
+        const customTitleSpan = document.querySelector('span[data-test-tag="case-title"]');
+        const caseTitle = customTitleSpan ? customTitleSpan.textContent.trim() : document.title.trim();
+        showAddCaseForm(caseTitle, window.location.href);
+    };
+
+    caseExportBtn.onclick = exportCasesAsCSV;
+
+
+    caseTrigger.onclick = () => {
+        casePanel.style.display = casePanel.style.display === 'none' ? 'block' : 'none';
+    };
+
+    renderCaseList();
+
+    document.addEventListener('click', (event) => {
+    // Merchant panel
+    const isClickInsideMerchant = container.contains(event.target) || trigger.contains(event.target);
+    if (!isClickInsideMerchant && panel.classList.contains('open')) {
+        panel.classList.remove('open');
+        topBar.style.display = 'none';
+    }
+
+    // Case panel
+    const isClickInsideCase = caseContainer.contains(event.target) || caseTrigger.contains(event.target);
+    if (!isClickInsideCase && casePanel.style.display === 'block') {
+        casePanel.style.display = 'none';
+    }
+});
 
 })();
